@@ -1,0 +1,134 @@
+<div class="dashboard-container">
+
+  <div class="add-user">
+    <h2>Добавить пользователя</h2>
+    <form (ngSubmit)="addUser()">
+      <input type="text" [(ngModel)]="newUser.username" name="username" placeholder="Логин" required />
+      <input type="password" [(ngModel)]="newUser.password" name="password" placeholder="Пароль" required />
+      <input type="email" [(ngModel)]="newUser.email" name="email" placeholder="Электронная почта" required />
+      
+      <select [(ngModel)]="newUser.role_id" name="role_id" required>
+        <option [value]="1">Администратор</option>
+        <option [value]="2">Сотрудник отдела</option>
+        <option [value]="3">Пользователь</option>
+      </select>
+
+      <div *ngIf="newUser.role_id == 2">
+        <select [(ngModel)]="newUser.department_id" name="department_id" required>
+          <option *ngFor="let department of departments" [value]="department.id">{{ department.name }}</option>
+        </select>
+      </div>
+
+      <button type="submit">Добавить</button>
+    </form>
+  </div>
+
+  <div class="user-list">
+    <h2>Список пользователей</h2>
+
+    <div class="filters">
+      <div>
+        <label for="username">Поиск по логину:</label>
+        <input id="username" type="text" [(ngModel)]="searchUsername" (ngModelChange)="filterUsers()" placeholder="Введите логин">
+      </div>
+
+      <div>
+        <label for="role">Фильтр по должности:</label>
+        <select id="role" [(ngModel)]="selectedRole" (ngModelChange)="filterUsers()">
+          <option value="">Все должности</option>
+          <option value="1">Администратор</option>
+          <option value="2">Сотрудник отдела</option>
+          <option value="3">Пользователь</option>
+        </select>
+      </div>
+
+      <div *ngIf="selectedRole === '2'">
+        <label for="department">Выберите отдел:</label>
+        <select id="department" [(ngModel)]="selectedDepartment" (ngModelChange)="filterUsers()">
+          <option value="">Все отделы</option>
+          <option *ngFor="let department of departments" [value]="department.id">
+            {{ department.name }}
+          </option>
+        </select>
+      </div>      
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Логин</th>
+          <th>Email</th>
+          <th>Должность</th>
+          <th>Действия</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let user of filteredUsers">
+          <td>{{ user.username }}</td>
+          <td>{{ user.email }}</td>
+          <td>
+            {{ user.role_id === 1 ? 'Администратор' : 
+               user.role_id === 2 ? 'Сотрудник отдела' + (user.department && user.department !== 'Нет отдела' ? ' (' + user.department + ')' : '') : 
+               'Пользователь' }}
+          </td>
+          
+          
+          <td>
+            <button (click)="deleteUser(user.id)">Удалить</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Список заявок</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>Заголовок</th>
+        <th>Описание</th>
+        <th>Пользователь</th>
+        <th>Отдел</th>
+        <th>Тип заявки</th>
+        <th>Статус</th>
+        <th>Дата создания</th>
+        <th>Обновлено</th>
+        <th>Действия</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let request of filteredRequests">
+        <td>{{ request.title }}</td>
+        <td>{{ request.description }}</td>
+        <td>{{ request.username }}</td>
+        <td>{{ request.department }}</td>
+        <td>{{ request.ticket_type }}</td>
+        <td>{{ request.status }}</td>
+        <td>{{ request.created_at | date:'short' }}</td>
+        <td>{{ request.updated_at | date:'short' }}</td>
+        <td class="admin-actions">
+          <div *ngIf="request.status !== 'completed'">
+            <!-- Если статус заявки не завершен и пользователь не администратор, показываем кнопки -->
+            <div *ngIf="isAdmin()">
+              <button (click)="updateRequestStatus(request.id, 'completed')">Завершить</button>
+            </div>
+            
+            <!-- Если статус заявки не завершен и пользователь администратор, показываем только статус -->
+            <div *ngIf="isAdmin()">
+              <span>{{ request.status === 'in_progress' ? 'В процессе' : 'Открыта' }}</span>
+            </div>
+          </div>
+          <div *ngIf="request.status === 'completed'">
+            <!-- Если заявка завершена, показываем статус и для администратора, и для обычных пользователей -->
+            <span>Завершено</span>
+          </div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <button (click)="toggleShowAll()">
+    {{ showAllRequests ? 'Свернуть заявки' : 'Показать все заявки' }}
+  </button>
+  
+</div>

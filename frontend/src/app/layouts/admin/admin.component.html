@@ -1,0 +1,13 @@
+<header>
+    <nav>
+        <button (click)="logout()">Выйти</button>
+    </nav>
+    <h1>Панель администратора</h1>
+</header>
+<body>
+<div class="admin-layout">
+    <main>
+      <router-outlet></router-outlet> <!-- Здесь будет загружаться DashboardComponent -->
+    </main>
+</div>
+</body>

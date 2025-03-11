@@ -1,0 +1,75 @@
+<div class="container">
+  <form (ngSubmit)="submitRequest()">
+    <div class="form-group">
+      <label for="ticket_type">Тип заявки</label>
+      <select id="ticket_type" class="form-control" [(ngModel)]="newRequest.ticket_type_id" name="ticket_type" (change)="onTicketTypeChange($event)" required>
+        <option value="" disabled selected>Выберите тип заявки</option>
+        <option *ngFor="let ticketType of ticketTypes" [value]="ticketType.id">
+          {{ ticketType.name }}
+        </option>
+      </select>
+    </div>
+
+    <div class="form-group" *ngIf="departments.length > 0 && newRequest.ticket_type_id">
+      <label for="department">Отдел</label>
+      <select id="department" class="form-control" [(ngModel)]="newRequest.department_id" name="department" required>
+        <option value="" disabled selected>Выберите отдел</option>
+        <option *ngFor="let department of departments" [value]="department.id">
+          {{ department.name }}
+        </option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="title">Заголовок</label>
+      <input id="title" class="form-control" type="text" [(ngModel)]="newRequest.title" name="title" required />
+    </div>
+
+    <div class="form-group">
+      <label for="description">Описание</label>
+      <textarea id="description" class="form-control" [(ngModel)]="newRequest.description" name="description" required></textarea>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Отправить заявку</button>
+    <button type="button" class="btn btn-secondary" (click)="generateWordDocumentAndSendEmail()">Сформировать документ</button>
+  </form>
+
+  <div *ngIf="requests.length > 0">
+    <h3>Мои заявки</h3>
+    <div class="list-group">
+      <div *ngFor="let request of requests" class="list-group-item">
+        <h5 class="mb-1">{{ request.title }}</h5>
+        <p class="mb-1"><strong>Описание:</strong> {{ request.description }}</p>
+        <small><strong>Статус:</strong> {{ request.status }}</small>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="requests.length === 0">
+    <p class="text-muted">Заявок пока нет.</p>
+  </div>
+
+  <div *ngIf="departmentRequests.length > 0">
+    <h3>Заявки отдела</h3>
+    <div class="list-group">
+      <div *ngFor="let request of departmentRequests" class="list-group-item">
+        <h5 class="mb-1">{{ request.title }}</h5>
+        <p class="mb-1"><strong>Описание:</strong> {{ request.description }}</p>
+        <small><strong>Статус:</strong> {{ request.status }}</small>
+        <button [disabled]="request.status === 'in_progress'" (click)="updateStatus(request.id, 'in_progress')">
+          Взять в работу
+        </button>
+        
+        <button [disabled]="request.status !== 'in_progress'" (click)="updateStatus(request.id, 'completed')">
+          Завершить
+        </button>
+        
+
+      </div>
+    </div>
+  </div>
+  
+  <div *ngIf="departmentRequests.length === 0">
+    <p class="text-muted">В отделе пока нет заявок.</p>
+  </div>
+</div>
